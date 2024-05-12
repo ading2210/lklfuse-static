@@ -3,21 +3,23 @@
 set -e
 set -x
 
-if [ ! -f "linux-master.zip" ]; then
-  wget "https://codeload.github.com/lkl/linux/zip/refs/heads/master" -O linux-master.zip
+if [ "$EUID" -ne 0 ]; then 
+  echo "this needs to be run as root"
+  exit 1
 fi
 
-if [ ! -d "linux" ]; then
-  unzip -q linux-master.zip
-  mv linux-master linux
+alpine_script_url="https://raw.githubusercontent.com/alpinelinux/alpine-chroot-install/master/alpine-chroot-install"
+if [ ! -f "alpine-chroot-install" ]; then
+  wget "$alpine_script_url" -O alpine-chroot-install
+  chmod +x ./alpine-chroot-install
 fi
 
+if [ ! -d "alpine" ]; then
+  mkdir -p alpine
+  chroot_dir="$(realpath alpine)"
+  ./alpine-chroot-install -d "$chroot_dir" -p "bash wget unzip flex bison upx python3 make gcc libc-dev fuse-static fuse-dev meson linux-headers"
+  alpine/enter-chroot apk add --no-cache --update --repository=https://dl-cdn.alpinelinux.org/alpine/v3.16/main/ libexecinfo-dev
+fi
 
-cd linux/tools/lkl
-
-make all -j$(nproc --all)
-mv liblkl.a lib
-
-gcc -static -O3 -s -flto lklfuse.c -D_FILE_OFFSET_BITS=64 -Llib -Iinclude -llkl -lfuse -o lklfuse
-upx -q lklfuse
-mv lklfuse ../../../
+alpine/enter-chroot ./build_lkl.sh
+alpine/enter-chroot ./build_fuse.sh

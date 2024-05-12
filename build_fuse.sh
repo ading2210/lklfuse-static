@@ -23,4 +23,4 @@ meson configure --default-library static \
   -D cpp_link_args="-static -s -flto" 
 ninja
 
-mv util/fusermount3 ../../
+cp util/fusermount3 ../../
