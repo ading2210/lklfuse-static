@@ -18,6 +18,6 @@ cd linux/tools/lkl
 make all -j$(nproc --all)
 mv liblkl.a lib
 
-gcc -static -O3 lklfuse.c -D_FILE_OFFSET_BITS=64 -Llib -Iinclude -llkl -lfuse -o lklfuse
+gcc -static -O3 -s -flto lklfuse.c -D_FILE_OFFSET_BITS=64 -Llib -Iinclude -llkl -lfuse -o lklfuse
 upx -q lklfuse
 mv lklfuse ../../../

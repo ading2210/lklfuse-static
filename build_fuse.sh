@@ -19,8 +19,8 @@ meson setup ..
 meson configure --default-library static \
   -D buildtype=release \
   -D prefer_static=true \
-  -D c_link_args="-static" \
-  -D cpp_link_args="-static" 
+  -D c_link_args="-static -s -flto" \
+  -D cpp_link_args="-static -s -flto" 
 ninja
 
 mv util/fusermount3 ../../
